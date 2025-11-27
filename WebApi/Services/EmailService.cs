@@ -1,15 +1,8 @@
-using YourNamespace.Helpers;
-using Microsoft.AspNetCore.Http;
-using System.Text;
+using WebApi.Models;
+using HttpClientHelper.Core;
 
-namespace YourNamespace.Services
+namespace WebApi.Services
 {
-    public interface IEmailService
-    {
-        Task<EmailSendResponse> SendEmailAsync(EmailSendRequest request);
-        Task<EmailStatusResponse> GetEmailStatusAsync(string messageId);
-    }
-
     public class EmailService : IEmailService
     {
         private readonly FlurlHttpHelper _httpHelper;
@@ -101,7 +94,7 @@ namespace YourNamespace.Services
 
             // FileUploadInfo 리스트 생성
             var files = new List<FileUploadInfo>();
-            
+
             try
             {
                 foreach (var attachment in request.Attachments!)
@@ -190,10 +183,10 @@ namespace YourNamespace.Services
 
                 return new EmailStatusResponse
                 {
-                    MessageId = apiResponse.Data.MessageId,
-                    Status = apiResponse.Data.Status,
-                    SentAt = apiResponse.Data.SentAt,
-                    DeliveredAt = apiResponse.Data.DeliveredAt
+                    MessageId = apiResponse.Data?.MessageId ?? string.Empty,
+                    Status = apiResponse.Data?.Status ?? string.Empty,
+                    SentAt = apiResponse.Data?.SentAt ?? DateTime.MinValue,
+                    DeliveredAt = apiResponse.Data?.DeliveredAt
                 };
             }
             catch (Exception ex)
@@ -213,38 +206,11 @@ namespace YourNamespace.Services
             return new EmailSendResponse
             {
                 Success = apiResponse.Success,
-                Message = apiResponse.Message,
+                Message = apiResponse.Message ?? string.Empty,
                 MessageId = apiResponse.Data?.MessageId,
                 SentAt = apiResponse.Data?.SentAt ?? DateTime.UtcNow,
                 AttachmentCount = attachmentCount
             };
         }
     }
-
-    #region API Response Models
-
-    /// <summary>
-    /// 외부 이메일 API 응답
-    /// </summary>
-    public class EmailApiResponse
-    {
-        public string MessageId { get; set; } = string.Empty;
-        public DateTime SentAt { get; set; }
-        public string Status { get; set; } = string.Empty;
-    }
-
-    /// <summary>
-    /// 외부 이메일 API 상태 응답
-    /// </summary>
-    public class EmailStatusApiResponse
-    {
-        public string MessageId { get; set; } = string.Empty;
-        public string Status { get; set; } = string.Empty;
-        public DateTime SentAt { get; set; }
-        public DateTime? DeliveredAt { get; set; }
-        public DateTime? OpenedAt { get; set; }
-        public int OpenCount { get; set; }
-    }
-
-    #endregion
 }

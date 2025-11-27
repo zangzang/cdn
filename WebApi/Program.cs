@@ -1,6 +1,6 @@
-// Program.cs - .NET 8
-using YourNamespace.Services;
+using WebApi.Services;
 using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -80,13 +80,15 @@ app.MapControllers();
 
 app.Run();
 
-// Swagger 파일 업로드 필터
+/// <summary>
+/// Swagger 파일 업로드 필터
+/// </summary>
 public class SwaggerFileOperationFilter : IOperationFilter
 {
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
     {
         var fileParameters = context.MethodInfo.GetParameters()
-            .Where(p => p.ParameterType == typeof(IFormFile) || 
+            .Where(p => p.ParameterType == typeof(IFormFile) ||
                        p.ParameterType == typeof(List<IFormFile>))
             .ToList();
 
@@ -120,56 +122,3 @@ public class SwaggerFileOperationFilter : IOperationFilter
         }
     }
 }
-
-
-/* ========================================
-   appsettings.json
-   ======================================== */
-
-/*
-{
-  "Logging": {
-    "LogLevel": {
-      "Default": "Information",
-      "Microsoft.AspNetCore": "Warning"
-    }
-  },
-  "AllowedHosts": "*",
-  
-  "EmailApi": {
-    "BaseUrl": "https://api.email-service.com",
-    "ApiKey": "your-api-key-here",
-    "ClientId": "your-client-id",
-    "TimeoutSeconds": 60
-  },
-  
-  "Kestrel": {
-    "Limits": {
-      "MaxRequestBodySize": 52428800
-    }
-  }
-}
-*/
-
-
-/* ========================================
-   appsettings.Development.json
-   ======================================== */
-
-/*
-{
-  "Logging": {
-    "LogLevel": {
-      "Default": "Debug",
-      "Microsoft.AspNetCore": "Information"
-    }
-  },
-  
-  "EmailApi": {
-    "BaseUrl": "https://dev-api.email-service.com",
-    "ApiKey": "dev-api-key",
-    "ClientId": "dev-client",
-    "TimeoutSeconds": 120
-  }
-}
-*/

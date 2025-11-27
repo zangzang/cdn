@@ -1,0 +1,49 @@
+# Ignore build output and intermediate files
+bin/
+obj/
+
+# Ignore user-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Ignore logs
+*.log
+
+# Ignore temporary files
+*.tmp
+*.temp
+*.tmp.*
+*.temp.*
+
+# Ignore publish output
+wwwroot/
+
+# Ignore Rider project files
+.idea/
+*.iml
+
+# Ignore Visual Studio Code workspace settings
+.vscode/
+
+# Ignore NuGet packages
+*.nupkg
+
+# Ignore by-products of NuGet restore
+project.lock.json
+*.nuget.props
+*.nuget.targets
+
+# Ignore JetBrains Rider files
+.idea/
+*.sln.iml
+
+# Ignore coverage output
+coverage/
+*.coverage
+*.coveragexml
+
+# Ignore other files
+Thumbs.db
+Desktop.ini

@@ -1,3 +1,4 @@
+using Flurl;
 using Flurl.Http;
 using System;
 using System.Collections.Generic;
@@ -5,7 +6,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace YourNamespace.Helpers
+namespace HttpClientHelper.Core
 {
     /// <summary>
     /// Flurl.Http를 사용한 HTTP 요청 Helper 클래스
@@ -29,13 +30,13 @@ namespace YourNamespace.Helpers
         public async Task<T> PostAsync<T>(
             string endpoint,
             object data,
-            Dictionary<string, string> headers = null,
-            Dictionary<string, object> queryParams = null,
+            Dictionary<string, string>? headers = null,
+            Dictionary<string, object>? queryParams = null,
             int? timeoutSeconds = null,
             CancellationToken cancellationToken = default)
         {
             var request = BuildRequest(endpoint, headers, queryParams, timeoutSeconds);
-            return await request.PostJsonAsync(data, cancellationToken).ReceiveJson<T>();
+            return await request.PostJsonAsync(data, cancellationToken: cancellationToken).ReceiveJson<T>();
         }
 
         /// <summary>
@@ -44,13 +45,13 @@ namespace YourNamespace.Helpers
         public async Task<T> PostFormAsync<T>(
             string endpoint,
             Dictionary<string, string> formData,
-            Dictionary<string, string> headers = null,
-            Dictionary<string, object> queryParams = null,
+            Dictionary<string, string>? headers = null,
+            Dictionary<string, object>? queryParams = null,
             int? timeoutSeconds = null,
             CancellationToken cancellationToken = default)
         {
             var request = BuildRequest(endpoint, headers, queryParams, timeoutSeconds);
-            return await request.PostUrlEncodedAsync(formData, cancellationToken).ReceiveJson<T>();
+            return await request.PostUrlEncodedAsync(formData, cancellationToken: cancellationToken).ReceiveJson<T>();
         }
 
         /// <summary>
@@ -59,13 +60,13 @@ namespace YourNamespace.Helpers
         public async Task<string> PostAsStringAsync(
             string endpoint,
             object data,
-            Dictionary<string, string> headers = null,
-            Dictionary<string, object> queryParams = null,
+            Dictionary<string, string>? headers = null,
+            Dictionary<string, object>? queryParams = null,
             int? timeoutSeconds = null,
             CancellationToken cancellationToken = default)
         {
             var request = BuildRequest(endpoint, headers, queryParams, timeoutSeconds);
-            return await request.PostJsonAsync(data, cancellationToken).ReceiveString();
+            return await request.PostJsonAsync(data, cancellationToken: cancellationToken).ReceiveString();
         }
 
         #endregion
@@ -80,9 +81,9 @@ namespace YourNamespace.Helpers
             Stream fileStream,
             string fileName,
             string fieldName = "file",
-            Dictionary<string, string> formData = null,
-            Dictionary<string, string> headers = null,
-            Dictionary<string, object> queryParams = null,
+            Dictionary<string, string>? formData = null,
+            Dictionary<string, string>? headers = null,
+            Dictionary<string, object>? queryParams = null,
             int? timeoutSeconds = null,
             CancellationToken cancellationToken = default)
         {
@@ -99,7 +100,7 @@ namespace YourNamespace.Helpers
                         mp.AddString(kvp.Key, kvp.Value);
                     }
                 }
-            }, cancellationToken).ReceiveJson<T>();
+            }, cancellationToken: cancellationToken).ReceiveJson<T>();
         }
 
         /// <summary>
@@ -109,9 +110,9 @@ namespace YourNamespace.Helpers
             string endpoint,
             string filePath,
             string fieldName = "file",
-            Dictionary<string, string> formData = null,
-            Dictionary<string, string> headers = null,
-            Dictionary<string, object> queryParams = null,
+            Dictionary<string, string>? formData = null,
+            Dictionary<string, string>? headers = null,
+            Dictionary<string, object>? queryParams = null,
             int? timeoutSeconds = null,
             CancellationToken cancellationToken = default)
         {
@@ -134,9 +135,9 @@ namespace YourNamespace.Helpers
             byte[] fileBytes,
             string fileName,
             string fieldName = "file",
-            Dictionary<string, string> formData = null,
-            Dictionary<string, string> headers = null,
-            Dictionary<string, object> queryParams = null,
+            Dictionary<string, string>? formData = null,
+            Dictionary<string, string>? headers = null,
+            Dictionary<string, object>? queryParams = null,
             int? timeoutSeconds = null,
             CancellationToken cancellationToken = default)
         {
@@ -157,9 +158,9 @@ namespace YourNamespace.Helpers
             string endpoint,
             List<string> filePaths,
             string fieldName = "files",
-            Dictionary<string, string> formData = null,
-            Dictionary<string, string> headers = null,
-            Dictionary<string, object> queryParams = null,
+            Dictionary<string, string>? formData = null,
+            Dictionary<string, string>? headers = null,
+            Dictionary<string, object>? queryParams = null,
             int? timeoutSeconds = null,
             CancellationToken cancellationToken = default)
         {
@@ -189,7 +190,7 @@ namespace YourNamespace.Helpers
                             mp.AddString(kvp.Key, kvp.Value);
                         }
                     }
-                }, cancellationToken).ReceiveJson<T>();
+                }, cancellationToken: cancellationToken).ReceiveJson<T>();
             }
             finally
             {
@@ -206,9 +207,9 @@ namespace YourNamespace.Helpers
         public async Task<T> PostWithMultipleFilesAsync<T>(
             string endpoint,
             Dictionary<string, string> filePathsWithFieldNames,
-            Dictionary<string, string> formData = null,
-            Dictionary<string, string> headers = null,
-            Dictionary<string, object> queryParams = null,
+            Dictionary<string, string>? formData = null,
+            Dictionary<string, string>? headers = null,
+            Dictionary<string, object>? queryParams = null,
             int? timeoutSeconds = null,
             CancellationToken cancellationToken = default)
         {
@@ -241,7 +242,7 @@ namespace YourNamespace.Helpers
                             mp.AddString(kvp.Key, kvp.Value);
                         }
                     }
-                }, cancellationToken).ReceiveJson<T>();
+                }, cancellationToken: cancellationToken).ReceiveJson<T>();
             }
             finally
             {
@@ -258,9 +259,9 @@ namespace YourNamespace.Helpers
         public async Task<T> PostWithFilesAsync<T>(
             string endpoint,
             List<FileUploadInfo> files,
-            Dictionary<string, string> formData = null,
-            Dictionary<string, string> headers = null,
-            Dictionary<string, object> queryParams = null,
+            Dictionary<string, string>? formData = null,
+            Dictionary<string, string>? headers = null,
+            Dictionary<string, object>? queryParams = null,
             int? timeoutSeconds = null,
             CancellationToken cancellationToken = default)
         {
@@ -280,7 +281,7 @@ namespace YourNamespace.Helpers
                         mp.AddString(kvp.Key, kvp.Value);
                     }
                 }
-            }, cancellationToken).ReceiveJson<T>();
+            }, cancellationToken: cancellationToken).ReceiveJson<T>();
         }
 
         #endregion
@@ -292,13 +293,13 @@ namespace YourNamespace.Helpers
         /// </summary>
         public async Task<T> GetAsync<T>(
             string endpoint,
-            Dictionary<string, string> headers = null,
-            Dictionary<string, object> queryParams = null,
+            Dictionary<string, string>? headers = null,
+            Dictionary<string, object>? queryParams = null,
             int? timeoutSeconds = null,
             CancellationToken cancellationToken = default)
         {
             var request = BuildRequest(endpoint, headers, queryParams, timeoutSeconds);
-            return await request.GetJsonAsync<T>(cancellationToken);
+            return await request.GetJsonAsync<T>(cancellationToken: cancellationToken);
         }
 
         #endregion
@@ -310,11 +311,11 @@ namespace YourNamespace.Helpers
         /// </summary>
         private IFlurlRequest BuildRequest(
             string endpoint,
-            Dictionary<string, string> headers,
-            Dictionary<string, object> queryParams,
+            Dictionary<string, string>? headers,
+            Dictionary<string, object>? queryParams,
             int? timeoutSeconds)
         {
-            var request = _baseUrl
+            var request = new Url(_baseUrl)
                 .AppendPathSegment(endpoint)
                 .WithTimeout(timeoutSeconds ?? _defaultTimeout);
 
@@ -375,8 +376,8 @@ namespace YourNamespace.Helpers
     public class ApiResponse<T>
     {
         public bool Success { get; set; }
-        public string Message { get; set; }
-        public T Data { get; set; }
+        public string? Message { get; set; }
+        public T? Data { get; set; }
         public int StatusCode { get; set; }
     }
 }

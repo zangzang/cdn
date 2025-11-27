@@ -1,11 +1,8 @@
-using System;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
-namespace YourNamespace.TestClient
+namespace Tests
 {
     /// <summary>
     /// Email API 테스트 클라이언트
@@ -25,15 +22,19 @@ namespace YourNamespace.TestClient
             };
         }
 
+        public EmailApiTestClient(HttpClient httpClient)
+        {
+            _httpClient = httpClient;
+            _baseUrl = httpClient.BaseAddress?.ToString() ?? "https://localhost:7001";
+        }
+
         #region 테스트 메소드
 
         /// <summary>
         /// 테스트 1: 파일 첨부 없는 간단한 이메일
         /// </summary>
-        public async Task Test1_SendSimpleEmail()
+        public async Task<HttpResponseMessage> SendSimpleEmailAsync()
         {
-            Console.WriteLine("=== 테스트 1: 간단한 이메일 전송 ===");
-
             var request = new
             {
                 recipients = "user@example.com",
@@ -45,21 +46,14 @@ namespace YourNamespace.TestClient
             var json = JsonSerializer.Serialize(request);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync("/api/email/send-simple", content);
-            var result = await response.Content.ReadAsStringAsync();
-
-            Console.WriteLine($"Status: {response.StatusCode}");
-            Console.WriteLine($"Response: {result}");
-            Console.WriteLine();
+            return await _httpClient.PostAsync("/api/email/send-simple", content);
         }
 
         /// <summary>
         /// 테스트 2: 단일 파일 첨부
         /// </summary>
-        public async Task Test2_SendEmailWithSingleFile()
+        public async Task<HttpResponseMessage> SendEmailWithSingleFileAsync()
         {
-            Console.WriteLine("=== 테스트 2: 단일 파일 첨부 ===");
-
             using var content = new MultipartFormDataContent();
 
             // 폼 데이터 추가
@@ -76,21 +70,14 @@ namespace YourNamespace.TestClient
             fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse("text/plain");
             content.Add(fileContent, "attachments", "test-document.txt");
 
-            var response = await _httpClient.PostAsync("/api/email/send", content);
-            var result = await response.Content.ReadAsStringAsync();
-
-            Console.WriteLine($"Status: {response.StatusCode}");
-            Console.WriteLine($"Response: {result}");
-            Console.WriteLine();
+            return await _httpClient.PostAsync("/api/email/send", content);
         }
 
         /// <summary>
         /// 테스트 3: 다중 파일 첨부
         /// </summary>
-        public async Task Test3_SendEmailWithMultipleFiles()
+        public async Task<HttpResponseMessage> SendEmailWithMultipleFilesAsync()
         {
-            Console.WriteLine("=== 테스트 3: 다중 파일 첨부 ===");
-
             using var content = new MultipartFormDataContent();
 
             // 폼 데이터
@@ -102,45 +89,31 @@ namespace YourNamespace.TestClient
             content.Add(new StringContent("High"), "priority");
 
             // 파일 1: 텍스트 파일
-            var file1Content = new ByteArrayContent(
-                Encoding.UTF8.GetBytes("First file content")
-            );
+            var file1Content = new ByteArrayContent(Encoding.UTF8.GetBytes("First file content"));
             file1Content.Headers.ContentType = MediaTypeHeaderValue.Parse("text/plain");
             content.Add(file1Content, "attachments", "file1.txt");
 
             // 파일 2: JSON 파일
-            var file2Content = new ByteArrayContent(
-                Encoding.UTF8.GetBytes("{\"test\": \"data\"}")
-            );
+            var file2Content = new ByteArrayContent(Encoding.UTF8.GetBytes("{\"test\": \"data\"}"));
             file2Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
             content.Add(file2Content, "attachments", "data.json");
 
             // 파일 3: CSV 파일
-            var file3Content = new ByteArrayContent(
-                Encoding.UTF8.GetBytes("Name,Age\nJohn,30\nJane,25")
-            );
+            var file3Content = new ByteArrayContent(Encoding.UTF8.GetBytes("Name,Age\nJohn,30\nJane,25"));
             file3Content.Headers.ContentType = MediaTypeHeaderValue.Parse("text/csv");
             content.Add(file3Content, "attachments", "users.csv");
 
-            var response = await _httpClient.PostAsync("/api/email/send", content);
-            var result = await response.Content.ReadAsStringAsync();
-
-            Console.WriteLine($"Status: {response.StatusCode}");
-            Console.WriteLine($"Response: {result}");
-            Console.WriteLine();
+            return await _httpClient.PostAsync("/api/email/send", content);
         }
 
         /// <summary>
         /// 테스트 4: 실제 파일 첨부 (파일 시스템에서 읽기)
         /// </summary>
-        public async Task Test4_SendEmailWithRealFile(string filePath)
+        public async Task<HttpResponseMessage> SendEmailWithRealFileAsync(string filePath)
         {
-            Console.WriteLine("=== 테스트 4: 실제 파일 첨부 ===");
-
             if (!File.Exists(filePath))
             {
-                Console.WriteLine($"파일을 찾을 수 없습니다: {filePath}");
-                return;
+                throw new FileNotFoundException($"파일을 찾을 수 없습니다: {filePath}");
             }
 
             using var content = new MultipartFormDataContent();
@@ -154,44 +127,29 @@ namespace YourNamespace.TestClient
             // 파일 읽기 및 추가
             var fileBytes = await File.ReadAllBytesAsync(filePath);
             var fileContent = new ByteArrayContent(fileBytes);
-            
+
             var fileName = Path.GetFileName(filePath);
             var mimeType = GetMimeType(fileName);
             fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse(mimeType);
-            
+
             content.Add(fileContent, "attachments", fileName);
 
-            var response = await _httpClient.PostAsync("/api/email/send", content);
-            var result = await response.Content.ReadAsStringAsync();
-
-            Console.WriteLine($"Status: {response.StatusCode}");
-            Console.WriteLine($"File: {fileName} ({fileBytes.Length} bytes)");
-            Console.WriteLine($"Response: {result}");
-            Console.WriteLine();
+            return await _httpClient.PostAsync("/api/email/send", content);
         }
 
         /// <summary>
         /// 테스트 5: 이메일 상태 조회
         /// </summary>
-        public async Task Test5_GetEmailStatus(string messageId)
+        public async Task<HttpResponseMessage> GetEmailStatusAsync(string messageId)
         {
-            Console.WriteLine("=== 테스트 5: 이메일 상태 조회 ===");
-
-            var response = await _httpClient.GetAsync($"/api/email/status/{messageId}");
-            var result = await response.Content.ReadAsStringAsync();
-
-            Console.WriteLine($"Status: {response.StatusCode}");
-            Console.WriteLine($"Response: {result}");
-            Console.WriteLine();
+            return await _httpClient.GetAsync($"/api/email/status/{messageId}");
         }
 
         /// <summary>
         /// 테스트 6: 입력 검증 테스트 (잘못된 이메일)
         /// </summary>
-        public async Task Test6_ValidationTest()
+        public async Task<HttpResponseMessage> SendInvalidEmailAsync()
         {
-            Console.WriteLine("=== 테스트 6: 입력 검증 (잘못된 이메일) ===");
-
             using var content = new MultipartFormDataContent();
 
             // 잘못된 이메일 형식
@@ -199,12 +157,7 @@ namespace YourNamespace.TestClient
             content.Add(new StringContent(""), "subject"); // 빈 제목
             content.Add(new StringContent("Test body"), "body");
 
-            var response = await _httpClient.PostAsync("/api/email/send", content);
-            var result = await response.Content.ReadAsStringAsync();
-
-            Console.WriteLine($"Status: {response.StatusCode}");
-            Console.WriteLine($"Response: {result}");
-            Console.WriteLine();
+            return await _httpClient.PostAsync("/api/email/send", content);
         }
 
         #endregion
@@ -238,78 +191,4 @@ namespace YourNamespace.TestClient
 
         #endregion
     }
-
-    /// <summary>
-    /// 프로그램 진입점
-    /// </summary>
-    class Program
-    {
-        static async Task Main(string[] args)
-        {
-            Console.WriteLine("Email API 테스트 클라이언트");
-            Console.WriteLine("================================\n");
-
-            var client = new EmailApiTestClient("https://localhost:7001");
-
-            try
-            {
-                // 테스트 1: 간단한 이메일
-                await client.Test1_SendSimpleEmail();
-
-                // 테스트 2: 단일 파일 첨부
-                await client.Test2_SendEmailWithSingleFile();
-
-                // 테스트 3: 다중 파일 첨부
-                await client.Test3_SendEmailWithMultipleFiles();
-
-                // 테스트 4: 실제 파일 첨부 (경로 지정 필요)
-                // await client.Test4_SendEmailWithRealFile(@"C:\Documents\test.pdf");
-
-                // 테스트 5: 상태 조회 (MessageId 필요)
-                // await client.Test5_GetEmailStatus("message-id-here");
-
-                // 테스트 6: 입력 검증
-                await client.Test6_ValidationTest();
-
-                Console.WriteLine("\n모든 테스트 완료!");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"\n오류 발생: {ex.Message}");
-                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
-            }
-
-            Console.WriteLine("\n계속하려면 아무 키나 누르세요...");
-            Console.ReadKey();
-        }
-    }
 }
-
-
-/* ========================================
-   Postman / cURL 예제
-   ======================================== */
-
-/*
-// cURL - 간단한 이메일 전송
-curl -X POST "https://localhost:7001/api/email/send-simple" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "recipients": "user@example.com",
-    "subject": "테스트",
-    "body": "내용",
-    "isHtml": false
-  }'
-
-// cURL - 파일 첨부
-curl -X POST "https://localhost:7001/api/email/send" \
-  -F "recipients=user@example.com" \
-  -F "subject=파일 첨부" \
-  -F "body=첨부파일 확인" \
-  -F "isHtml=false" \
-  -F "attachments=@/path/to/file.pdf" \
-  -F "attachments=@/path/to/image.jpg"
-
-// cURL - 상태 조회
-curl -X GET "https://localhost:7001/api/email/status/{messageId}"
-*/
