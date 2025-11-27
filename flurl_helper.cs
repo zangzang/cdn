@@ -88,18 +88,18 @@ namespace YourNamespace.Helpers
         {
             var request = BuildRequest(endpoint, headers, queryParams, timeoutSeconds);
 
-            var content = new CapturedMultipartContent();
-            content.AddFile(fieldName, fileStream, fileName);
-
-            if (formData != null)
+            return await request.PostMultipartAsync(mp =>
             {
-                foreach (var kvp in formData)
-                {
-                    content.AddString(kvp.Key, kvp.Value);
-                }
-            }
+                mp.AddFile(fieldName, fileStream, fileName);
 
-            return await request.PostMultipartAsync(content, cancellationToken).ReceiveJson<T>();
+                if (formData != null)
+                {
+                    foreach (var kvp in formData)
+                    {
+                        mp.AddString(kvp.Key, kvp.Value);
+                    }
+                }
+            }, cancellationToken).ReceiveJson<T>();
         }
 
         /// <summary>
@@ -165,27 +165,39 @@ namespace YourNamespace.Helpers
         {
             var request = BuildRequest(endpoint, headers, queryParams, timeoutSeconds);
 
-            var content = new CapturedMultipartContent();
+            var streams = new List<Stream>();
 
-            foreach (var filePath in filePaths)
+            try
             {
-                if (!File.Exists(filePath))
-                    throw new FileNotFoundException($"파일을 찾을 수 없습니다: {filePath}");
-
-                var fileStream = File.OpenRead(filePath);
-                var fileName = Path.GetFileName(filePath);
-                content.AddFile(fieldName, fileStream, fileName);
-            }
-
-            if (formData != null)
-            {
-                foreach (var kvp in formData)
+                return await request.PostMultipartAsync(mp =>
                 {
-                    content.AddString(kvp.Key, kvp.Value);
+                    foreach (var filePath in filePaths)
+                    {
+                        if (!File.Exists(filePath))
+                            throw new FileNotFoundException($"파일을 찾을 수 없습니다: {filePath}");
+
+                        var fileStream = File.OpenRead(filePath);
+                        streams.Add(fileStream);
+                        var fileName = Path.GetFileName(filePath);
+                        mp.AddFile(fieldName, fileStream, fileName);
+                    }
+
+                    if (formData != null)
+                    {
+                        foreach (var kvp in formData)
+                        {
+                            mp.AddString(kvp.Key, kvp.Value);
+                        }
+                    }
+                }, cancellationToken).ReceiveJson<T>();
+            }
+            finally
+            {
+                foreach (var stream in streams)
+                {
+                    stream?.Dispose();
                 }
             }
-
-            return await request.PostMultipartAsync(content, cancellationToken).ReceiveJson<T>();
         }
 
         /// <summary>
@@ -202,30 +214,42 @@ namespace YourNamespace.Helpers
         {
             var request = BuildRequest(endpoint, headers, queryParams, timeoutSeconds);
 
-            var content = new CapturedMultipartContent();
+            var streams = new List<Stream>();
 
-            foreach (var kvp in filePathsWithFieldNames)
+            try
             {
-                var fieldName = kvp.Key;
-                var filePath = kvp.Value;
-
-                if (!File.Exists(filePath))
-                    throw new FileNotFoundException($"파일을 찾을 수 없습니다: {filePath}");
-
-                var fileStream = File.OpenRead(filePath);
-                var fileName = Path.GetFileName(filePath);
-                content.AddFile(fieldName, fileStream, fileName);
-            }
-
-            if (formData != null)
-            {
-                foreach (var kvp in formData)
+                return await request.PostMultipartAsync(mp =>
                 {
-                    content.AddString(kvp.Key, kvp.Value);
+                    foreach (var kvp in filePathsWithFieldNames)
+                    {
+                        var fieldName = kvp.Key;
+                        var filePath = kvp.Value;
+
+                        if (!File.Exists(filePath))
+                            throw new FileNotFoundException($"파일을 찾을 수 없습니다: {filePath}");
+
+                        var fileStream = File.OpenRead(filePath);
+                        streams.Add(fileStream);
+                        var fileName = Path.GetFileName(filePath);
+                        mp.AddFile(fieldName, fileStream, fileName);
+                    }
+
+                    if (formData != null)
+                    {
+                        foreach (var kvp in formData)
+                        {
+                            mp.AddString(kvp.Key, kvp.Value);
+                        }
+                    }
+                }, cancellationToken).ReceiveJson<T>();
+            }
+            finally
+            {
+                foreach (var stream in streams)
+                {
+                    stream?.Dispose();
                 }
             }
-
-            return await request.PostMultipartAsync(content, cancellationToken).ReceiveJson<T>();
         }
 
         /// <summary>
@@ -242,22 +266,21 @@ namespace YourNamespace.Helpers
         {
             var request = BuildRequest(endpoint, headers, queryParams, timeoutSeconds);
 
-            var content = new CapturedMultipartContent();
-
-            foreach (var file in files)
+            return await request.PostMultipartAsync(mp =>
             {
-                content.AddFile(file.FieldName, file.Stream, file.FileName);
-            }
-
-            if (formData != null)
-            {
-                foreach (var kvp in formData)
+                foreach (var file in files)
                 {
-                    content.AddString(kvp.Key, kvp.Value);
+                    mp.AddFile(file.FieldName, file.Stream, file.FileName);
                 }
-            }
 
-            return await request.PostMultipartAsync(content, cancellationToken).ReceiveJson<T>();
+                if (formData != null)
+                {
+                    foreach (var kvp in formData)
+                    {
+                        mp.AddString(kvp.Key, kvp.Value);
+                    }
+                }
+            }, cancellationToken).ReceiveJson<T>();
         }
 
         #endregion
