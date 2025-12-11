@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    
+    // 기본 실행 프로필
+    "ConsoleApp": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development",
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    
+    // 명령줄 인수와 함께 실행
+    "ConsoleApp (with args)": {
+      "commandName": "Project",
+      "commandLineArgs": "arg1 arg2 --name \"홍길동\" --age 30",
+      "dotnetRunMessages": true,
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    
+    // 프로덕션 환경 시뮬레이션
+    "ConsoleApp (Production)": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Production",
+        "DB_HOST": "prod-server",
+        "DB_PORT": "5432",
+        "API_KEY": "prod-api-key-here"
+      }
+    },
+    
+    // 디버깅용 (상세 로그)
+    "ConsoleApp (Debug)": {
+      "commandName": "Project",
+      "commandLineArgs": "--verbose --debug",
+      "dotnetRunMessages": true,
+      "launchBrowser": false,
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development",
+        "Logging__LogLevel__Default": "Debug",
+        "Logging__LogLevel__Microsoft": "Debug"
+      }
+    },
+    
+    // 작업 디렉토리 변경
+    "ConsoleApp (Custom WorkDir)": {
+      "commandName": "Project",
+      "workingDirectory": "$(ProjectDir)\\TestData",
+      "dotnetRunMessages": true,
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    
+    // 빌드된 실행 파일 직접 실행
+    "Run Executable": {
+      "commandName": "Executable",
+      "executablePath": "$(ProjectDir)\\bin\\Debug\\net9.0\\ConsoleApp.exe",
+      "commandLineArgs": "test",
+      "workingDirectory": "$(ProjectDir)\\bin\\Debug\\net9.0",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    
+    // 외부 도구와 함께 실행
+    "Docker": {
+      "commandName": "Docker",
+      "launchBrowser": false
+    },
+    
+    // WSL (Windows Subsystem for Linux)에서 실행
+    "WSL": {
+      "commandName": "WSL2",
+      "distributionName": "Ubuntu",
+      "commandLineArgs": "",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
