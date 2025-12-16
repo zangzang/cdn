@@ -51,12 +51,15 @@ namespace SseClient
             }
             else
             {
+                // SSE는 무한정 연결을 유지해야 하므로 Timeout.InfiniteTimeSpan 사용
+                var httpTimeout = timeout ?? System.Threading.Timeout.InfiniteTimeSpan;
                 _httpClient = new HttpClient
                 {
-                    Timeout = timeout ?? TimeSpan.FromSeconds(100)
+                    Timeout = httpTimeout
                 };
                 _disposeHttpClient = true;
-                _logger.LogDebug("Created new HttpClient with timeout: {Timeout}", timeout ?? TimeSpan.FromSeconds(100));
+                _logger.LogDebug("Created new HttpClient with timeout: {Timeout}", 
+                    httpTimeout == System.Threading.Timeout.InfiniteTimeSpan ? "Infinite" : httpTimeout.ToString());
             }
 
             _autoReconnect = autoReconnect;
@@ -521,9 +524,10 @@ namespace SseClient
             var logger = loggerFactory.CreateLogger<ServerSentEventsClient>();
 
             // HttpClient 생성 (선택적, DI에서 주입받을 수도 있음)
+            // SSE용이므로 Timeout을 무한으로 설정
             var httpClient = new HttpClient
             {
-                Timeout = TimeSpan.FromSeconds(100)
+                Timeout = System.Threading.Timeout.InfiniteTimeSpan
             };
 
             using (var client = new ServerSentEventsClient(
